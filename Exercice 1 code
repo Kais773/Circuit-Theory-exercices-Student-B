@@ -1,0 +1,260 @@
+%% ========================================
+%% EXERCISE 1: MESH ANALYSIS & SUPERPOSITION
+%% Student B - Variant B
+%% ========================================
+
+clear all; close all; clc;
+
+%% ===== DONNÉES DU CIRCUIT =====
+fprintf('=== EXERCISE 1: MESH ANALYSIS ===\n\n');
+
+% Sources (forme polaire -> rectangulaire)
+E1_mag = 120;           % V
+E1_angle = 30;          % degrés
+E1 = E1_mag * exp(1j * E1_angle * pi/180);
+
+E2_mag = 60;            % V
+E2_angle = -45;         % degrés
+E2 = E2_mag * exp(1j * E2_angle * pi/180);
+
+% Impédances
+Z1 = 8;                 % Ω
+Z2 = 6 + 8j;            % Ω
+Z3 = 10;                % Ω
+Z4 = 5 - 4j;            % Ω
+Z5 = 12j;               % Ω
+
+fprintf('Circuit Parameters:\n');
+fprintf('E1 = %.2f∠%.1f° V\n', E1_mag, E1_angle);
+fprintf('E2 = %.2f∠%.1f° V\n', E2_mag, E2_angle);
+fprintf('Z1 = %.2f Ω\n', Z1);
+fprintf('Z2 = %.2f + %.2fj Ω\n', real(Z2), imag(Z2));
+fprintf('Z3 = %.2f Ω\n', Z3);
+fprintf('Z4 = %.2f + %.2fj Ω\n', real(Z4), imag(Z4));
+fprintf('Z5 = %.2fj Ω\n\n', imag(Z5));
+
+%% ===== TASK 1: MATRICE D'IMPÉDANCE [Z] =====
+fprintf('--- TASK 1: Impedance Matrix ---\n');
+
+% Construction de la matrice 3x3
+Z_matrix = [
+    Z1+Z2,      -Z2,         0;       % Maille a
+    -Z2,        Z2+Z3+Z4,   -Z4;      % Maille b
+    0,          -Z4,        Z4+Z5     % Maille c
+];
+
+fprintf('Impedance Matrix [Z]:\n');
+disp(Z_matrix);
+
+%% ===== TASK 2: CALCUL DU DÉTERMINANT =====
+fprintf('--- TASK 2: Determinant Calculation ---\n');
+
+det_Z = det(Z_matrix);
+fprintf('det(Z) = %.2f + %.2fj Ω³\n', real(det_Z), imag(det_Z));
+fprintf('|det(Z)| = %.2f Ω³\n', abs(det_Z));
+fprintf('∠det(Z) = %.2f°\n\n', angle(det_Z)*180/pi);
+
+%% ===== TASK 3: VECTEUR TENSIONS [E] =====
+fprintf('--- TASK 3: Voltage Vector ---\n');
+
+E_vector = [E1; 0; -E2];  % Attention au signe de E2!
+fprintf('Voltage Vector [E]:\n');
+fprintf('E1 = %.2f + %.2fj V\n', real(E1), imag(E1));
+fprintf('E2 = 0 V (maille b)\n');
+fprintf('E3 = %.2f + %.2fj V (-E2)\n\n', real(-E2), imag(-E2));
+
+%% ===== TASK 4: RÉSOLUTION [I] = [Z]^(-1) * [E] =====
+fprintf('--- TASK 4: Mesh Current Solution ---\n');
+
+I_mesh = Z_matrix \ E_vector;  % Résolution du système
+
+Ia = I_mesh(1);
+Ib = I_mesh(2);
+Ic = I_mesh(3);
+
+fprintf('Mesh Currents:\n');
+fprintf('Ia = %.3f∠%.2f° A  (%.3f + %.3fj A)\n', ...
+    abs(Ia), angle(Ia)*180/pi, real(Ia), imag(Ia));
+fprintf('Ib = %.3f∠%.2f° A  (%.3f + %.3fj A)\n', ...
+    abs(Ib), angle(Ib)*180/pi, real(Ib), imag(Ib));
+fprintf('Ic = %.3f∠%.2f° A  (%.3f + %.3fj A)\n\n', ...
+    abs(Ic), angle(Ic)*180/pi, real(Ic), imag(Ic));
+
+%% ===== TASK 5: COURANT DANS Z3 =====
+fprintf('--- TASK 5: Current through Z3 ---\n');
+
+% Z3 est traversé uniquement par Ib (maille b)
+I_Z3_mesh = Ib;
+
+fprintf('I_Z3 (Mesh Analysis) = %.3f∠%.2f° A\n\n', ...
+    abs(I_Z3_mesh), angle(I_Z3_mesh)*180/pi);
+
+%% ===== TASK 6: SUPERPOSITION - CAS 1 (E1 seul) =====
+fprintf('--- TASK 6: Superposition - Case 1 (E1 active only) ---\n');
+
+E_vector_case1 = [E1; 0; 0];  % E2 = 0 (court-circuit)
+I_case1 = Z_matrix \ E_vector_case1;
+
+Ia1 = I_case1(1);
+Ib1 = I_case1(2);
+Ic1 = I_case1(3);
+
+I_Z3_case1 = Ib1;
+
+fprintf('Case 1 mesh currents:\n');
+fprintf('Ia1 = %.3f∠%.2f° A\n', abs(Ia1), angle(Ia1)*180/pi);
+fprintf('Ib1 = %.3f∠%.2f° A\n', abs(Ib1), angle(Ib1)*180/pi);
+fprintf('Ic1 = %.3f∠%.2f° A\n', abs(Ic1), angle(Ic1)*180/pi);
+fprintf('I_Z3 (Case 1) = %.3f∠%.2f° A\n\n', ...
+    abs(I_Z3_case1), angle(I_Z3_case1)*180/pi);
+
+%% ===== TASK 7: SUPERPOSITION - CAS 2 (E2 seul) =====
+fprintf('--- TASK 7: Superposition - Case 2 (E2 active only) ---\n');
+
+E_vector_case2 = [0; 0; -E2];  % E1 = 0 (court-circuit)
+I_case2 = Z_matrix \ E_vector_case2;
+
+Ia2 = I_case2(1);
+Ib2 = I_case2(2);
+Ic2 = I_case2(3);
+
+I_Z3_case2 = Ib2;
+
+fprintf('Case 2 mesh currents:\n');
+fprintf('Ia2 = %.3f∠%.2f° A\n', abs(Ia2), angle(Ia2)*180/pi);
+fprintf('Ib2 = %.3f∠%.2f° A\n', abs(Ib2), angle(Ib2)*180/pi);
+fprintf('Ic2 = %.3f∠%.2f° A\n', abs(Ic2), angle(Ic2)*180/pi);
+fprintf('I_Z3 (Case 2) = %.3f∠%.2f° A\n\n', ...
+    abs(I_Z3_case2), angle(I_Z3_case2)*180/pi);
+
+%% ===== TASK 8: SUPERPOSITION - TOTAL =====
+fprintf('--- TASK 8: Superposition - Total ---\n');
+
+I_Z3_superposition = I_Z3_case1 + I_Z3_case2;
+
+fprintf('I_Z3 (Superposition) = %.3f∠%.2f° A\n', ...
+    abs(I_Z3_superposition), angle(I_Z3_superposition)*180/pi);
+fprintf('I_Z3 (Mesh Analysis) = %.3f∠%.2f° A\n', ...
+    abs(I_Z3_mesh), angle(I_Z3_mesh)*180/pi);
+
+% Vérification
+difference = abs(I_Z3_mesh - I_Z3_superposition);
+fprintf('\n✓ VERIFICATION: Difference = %.6f A\n', difference);
+
+if difference < 1e-6
+    fprintf('✓✓✓ PERFECT MATCH! Both methods agree!\n\n');
+else
+    fprintf('⚠ Warning: Methods differ by %.6f A\n\n', difference);
+end
+
+%% ===== TASK 9: PUISSANCE DANS Z3 =====
+fprintf('--- TASK 9: Power in Z3 ---\n');
+
+% Z3 est purement résistif (10 Ω)
+P_Z3 = abs(I_Z3_mesh)^2 * real(Z3);
+Q_Z3 = abs(I_Z3_mesh)^2 * imag(Z3);  % 0 car résistif
+S_Z3 = abs(I_Z3_mesh)^2 * Z3;
+
+fprintf('Active Power:   P_Z3 = %.2f W\n', P_Z3);
+fprintf('Reactive Power: Q_Z3 = %.2f VAr\n', Q_Z3);
+fprintf('Apparent Power: S_Z3 = %.2f VA\n\n', abs(S_Z3));
+
+%% ===== TASK 10: PUISSANCE DES SOURCES =====
+fprintf('--- TASK 10: Source Power Comparison ---\n');
+
+% Puissance délivrée par E1
+P_E1 = real(E1 * conj(Ia));
+Q_E1 = imag(E1 * conj(Ia));
+S_E1 = E1 * conj(Ia);
+
+fprintf('Source E1:\n');
+fprintf('  P_E1 = %.2f W\n', P_E1);
+fprintf('  Q_E1 = %.2f VAr\n', Q_E1);
+fprintf('  S_E1 = %.2f VA\n', abs(S_E1));
+
+% Puissance délivrée par E2
+% E2 est orienté contre Ic dans la maille c
+P_E2 = real(E2 * conj(-Ic));
+Q_E2 = imag(E2 * conj(-Ic));
+S_E2 = E2 * conj(-Ic);
+
+fprintf('\nSource E2:\n');
+fprintf('  P_E2 = %.2f W\n', P_E2);
+fprintf('  Q_E2 = %.2f VAr\n', Q_E2);
+fprintf('  S_E2 = %.2f VA\n', abs(S_E2));
+
+fprintf('\n');
+if abs(P_E1) > abs(P_E2)
+    fprintf('✓ Source E1 delivers MORE power (%.1f%% more)\n\n', ...
+        (abs(P_E1)/abs(P_E2)-1)*100);
+else
+    fprintf('✓ Source E2 delivers MORE power\n\n');
+end
+
+%% ===== TASK 11: PLOT TEMPOREL (COMPARAISON) =====
+fprintf('--- TASK 11: Time-Domain Comparison Plot ---\n');
+
+% Paramètres temporels
+f = 50;                          % Hz (fréquence typique)
+omega = 2*pi*f;
+t = linspace(0, 0.04, 1000);     % 2 périodes (40 ms)
+
+% Conversion phaseur -> temps
+i_Z3_mesh_t = abs(I_Z3_mesh) * cos(omega*t + angle(I_Z3_mesh));
+i_Z3_super_t = abs(I_Z3_superposition) * cos(omega*t + angle(I_Z3_superposition));
+
+% Plot
+figure('Position', [100 100 1000 600]);
+plot(t*1000, i_Z3_mesh_t, 'b-', 'LineWidth', 2.5, 'DisplayName', 'Mesh Analysis');
+hold on;
+plot(t*1000, i_Z3_super_t, 'r--', 'LineWidth', 2, 'DisplayName', 'Superposition');
+grid on;
+xlabel('Time (ms)', 'FontSize', 12, 'FontWeight', 'bold');
+ylabel('Current I_{Z3} (A)', 'FontSize', 12, 'FontWeight', 'bold');
+title('Exercise 1: Mesh Analysis vs Superposition for I_{Z3}', ...
+    'FontSize', 14, 'FontWeight', 'bold');
+legend('Location', 'northeast', 'FontSize', 11);
+set(gca, 'FontSize', 11);
+
+% Sauvegarde
+saveas(gcf, 'Ex1_Comparison.png');
+fprintf('✓ Plot saved as: Ex1_Comparison.png\n\n');
+
+%% ===== TASK 12: DIAGRAMME PHASORIEL =====
+fprintf('--- TASK 12: Phasor Diagram ---\n');
+
+figure('Position', [150 150 800 800]);
+
+% Origines
+hold on; axis equal; grid on;
+
+% Courants de maille
+quiver(0, 0, real(Ia), imag(Ia), 0, 'b', 'LineWidth', 2.5, 'MaxHeadSize', 0.5);
+quiver(0, 0, real(Ib), imag(Ib), 0, 'r', 'LineWidth', 2.5, 'MaxHeadSize', 0.5);
+quiver(0, 0, real(Ic), imag(Ic), 0, 'g', 'LineWidth', 2.5, 'MaxHeadSize', 0.5);
+
+% Labels
+text(real(Ia)*1.1, imag(Ia)*1.1, 'I_a', 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'b');
+text(real(Ib)*1.1, imag(Ib)*1.1, 'I_b = I_{Z3}', 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'r');
+text(real(Ic)*1.1, imag(Ic)*1.1, 'I_c', 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'g');
+
+xlabel('Real (A)', 'FontSize', 12, 'FontWeight', 'bold');
+ylabel('Imaginary (A)', 'FontSize', 12, 'FontWeight', 'bold');
+title('Phasor Diagram: Mesh Currents', 'FontSize', 14, 'FontWeight', 'bold');
+legend('I_a', 'I_b (I_{Z3})', 'I_c', 'Location', 'best', 'FontSize', 11);
+
+saveas(gcf, 'Ex1_Phasor_Diagram.png');
+fprintf('✓ Phasor diagram saved as: Ex1_Phasor_Diagram.png\n\n');
+
+%% ===== RÉSUMÉ FINAL =====
+fprintf('========================================\n');
+fprintf('EXERCISE 1 SUMMARY\n');
+fprintf('========================================\n');
+fprintf('Mesh currents: Ia=%.2f∠%.1f°A, Ib=%.2f∠%.1f°A, Ic=%.2f∠%.1f°A\n', ...
+    abs(Ia), angle(Ia)*180/pi, abs(Ib), angle(Ib)*180/pi, abs(Ic), angle(Ic)*180/pi);
+fprintf('I_Z3: %.3f∠%.2f° A\n', abs(I_Z3_mesh), angle(I_Z3_mesh)*180/pi);
+fprintf('Power in Z3: %.2f W\n', P_Z3);
+fprintf('E1 delivers: %.2f W\n', P_E1);
+fprintf('E2 delivers: %.2f W\n', P_E2);
+fprintf('Verification: Mesh = Superposition ✓\n');
+fprintf('========================================\n');
