@@ -1,0 +1,457 @@
+%% ========================================
+%% EXERCISE 3: POWER ANALYSIS & POWER FACTOR CORRECTION
+%% Student B - Variant B
+%% ========================================
+
+clear all; close all; clc;
+
+fprintf('========================================\n');
+fprintf('EXERCISE 3: POWER ANALYSIS & PF CORRECTION\n');
+fprintf('Student B - Variant B\n');
+fprintf('========================================\n\n');
+
+%% ===== DONNÉES DU SYSTÈME =====
+
+U = 400;        % V (tension d'alimentation)
+f = 50;         % Hz
+omega = 2*pi*f;
+
+fprintf('System Parameters:\n');
+fprintf('Supply Voltage: U = %.0f V\n', U);
+fprintf('Frequency: f = %.0f Hz\n', f);
+fprintf('Angular frequency: ω = %.2f rad/s\n\n', omega);
+
+%% ===== TASK 1: CARACTÉRISATION CHARGE 1 (MOTEUR) =====
+fprintf('========================================\n');
+fprintf('TASK 1: LOAD 1 - MOTOR\n');
+fprintf('========================================\n');
+
+P1 = 5000;              % W
+cos_phi1 = 0.75;        % lagging
+phi1 = acos(cos_phi1);  % rad
+
+Q1 = P1 * tan(phi1);    % VAr (positif car lagging = inductif)
+S1 = P1 / cos_phi1;     % VA
+I1 = S1 / U;            % A
+phi1_deg = phi1 * 180/pi;
+
+fprintf('Load 1 (Motor):\n');
+fprintf('  Given: P1 = %.0f W, cos(φ1) = %.2f (lagging)\n', P1, cos_phi1);
+fprintf('  Phase angle: φ1 = %.2f°\n', phi1_deg);
+fprintf('  Reactive Power: Q1 = %.2f VAr (inductive)\n', Q1);
+fprintf('  Apparent Power: S1 = %.2f VA\n', S1);
+fprintf('  Current: I1 = %.2f A\n\n', I1);
+
+%% ===== TASK 2: CARACTÉRISATION CHARGE 2 (CHAUFFAGE) =====
+fprintf('========================================\n');
+fprintf('TASK 2: LOAD 2 - HEATING (RESISTIVE)\n');
+fprintf('========================================\n');
+
+P2 = 3000;              % W
+Q2 = 0;                 % VAr (purement résistif)
+S2 = P2;                % VA
+cos_phi2 = 1.0;         % Résistif pur
+I2 = S2 / U;            % A
+phi2_deg = 0;
+
+fprintf('Load 2 (Heating):\n');
+fprintf('  Given: P2 = %.0f W (purely resistive)\n', P2);
+fprintf('  Reactive Power: Q2 = %.2f VAr\n', Q2);
+fprintf('  Apparent Power: S2 = %.2f VA\n', S2);
+fprintf('  Current: I2 = %.2f A\n');
+fprintf('  Power Factor: cos(φ2) = %.2f (unity)\n\n', cos_phi2);
+
+%% ===== TASK 3: CARACTÉRISATION CHARGE 3 (ÉCLAIRAGE) =====
+fprintf('========================================\n');
+fprintf('TASK 3: LOAD 3 - FLUORESCENT LIGHTING\n');
+fprintf('========================================\n');
+
+S3 = 2000;              % VA
+cos_phi3 = 0.9;         % lagging
+phi3 = acos(cos_phi3);  % rad
+
+P3 = S3 * cos_phi3;     % W
+Q3 = S3 * sin(phi3);    % VAr (positif car lagging)
+I3 = S3 / U;            % A
+phi3_deg = phi3 * 180/pi;
+
+fprintf('Load 3 (Fluorescent Lighting):\n');
+fprintf('  Given: S3 = %.0f VA, cos(φ3) = %.2f (lagging)\n', S3, cos_phi3);
+fprintf('  Phase angle: φ3 = %.2f°\n', phi3_deg);
+fprintf('  Active Power: P3 = %.2f W\n', P3);
+fprintf('  Reactive Power: Q3 = %.2f VAr (inductive)\n', Q3);
+fprintf('  Current: I3 = %.2f A\n\n', I3);
+
+%% ===== TASK 4: CARACTÉRISATION CHARGE 4 (ÉLECTRONIQUE) =====
+fprintf('========================================\n');
+fprintf('TASK 4: LOAD 4 - POWER ELECTRONICS\n');
+fprintf('========================================\n');
+
+P4 = 2500;              % W
+Q4 = -1500;             % VAr (NÉGATIF = capacitif = leading)
+
+S4 = sqrt(P4^2 + Q4^2); % VA
+cos_phi4 = P4 / S4;     % Power factor
+phi4 = acos(cos_phi4);  % rad
+if Q4 < 0
+    phi4 = -phi4;       % Négatif pour leading
+end
+I4 = S4 / U;            % A
+phi4_deg = phi4 * 180/pi;
+
+fprintf('Load 4 (Power Electronics):\n');
+fprintf('  Given: P4 = %.0f W, Q4 = %.0f VAr (LEADING/capacitive)\n', P4, Q4);
+fprintf('  Apparent Power: S4 = %.2f VA\n', S4);
+fprintf('  Phase angle: φ4 = %.2f° (leading)\n', phi4_deg);
+fprintf('  Power Factor: cos(φ4) = %.3f (leading)\n', cos_phi4);
+fprintf('  Current: I4 = %.2f A\n\n', I4);
+
+%% ===== TASK 5: TABLE RÉCAPITULATIVE =====
+fprintf('========================================\n');
+fprintf('TASK 5: COMPLETE POWER TABLE\n');
+fprintf('========================================\n');
+
+% Tableau
+fprintf('\n');
+fprintf('┌─────────┬──────────┬──────────┬──────────┬──────────┬──────────┐\n');
+fprintf('│  Load   │   P (W)  │  Q (VAr) │  S (VA)  │  I (A)   │  cos(φ)  │\n');
+fprintf('├─────────┼──────────┼──────────┼──────────┼──────────┼──────────┤\n');
+fprintf('│ Motor   │ %8.0f │ %8.2f │ %8.2f │ %8.2f │  %.3f   │\n', P1, Q1, S1, I1, cos_phi1);
+fprintf('│ Heating │ %8.0f │ %8.2f │ %8.2f │ %8.2f │  %.3f   │\n', P2, Q2, S2, I2, cos_phi2);
+fprintf('│ Lighting│ %8.0f │ %8.2f │ %8.2f │ %8.2f │  %.3f   │\n', P3, Q3, S3, I3, cos_phi3);
+fprintf('│ Electron│ %8.0f │ %8.2f │ %8.2f │ %8.2f │  %.3f   │\n', P4, Q4, S4, I4, cos_phi4);
+fprintf('└─────────┴──────────┴──────────┴──────────┴──────────┴──────────┘\n\n');
+
+%% ===== TASK 6: THÉORÈME DE BOUCHEROT =====
+fprintf('========================================\n');
+fprintf('TASK 6: BOUCHEROT THEOREM - SYSTEM TOTALS\n');
+fprintf('========================================\n');
+
+% Totaux
+PT = P1 + P2 + P3 + P4;         % W
+QT = Q1 + Q2 + Q3 + Q4;         % VAr
+ST = sqrt(PT^2 + QT^2);         % VA
+cos_phiT = PT / ST;             % Power factor
+phiT = acos(cos_phiT);
+phiT_deg = phiT * 180/pi;
+IT = ST / U;                    % A
+
+fprintf('System Totals (BEFORE correction):\n');
+fprintf('  Total Active Power:    PT = %.2f W\n', PT);
+fprintf('  Total Reactive Power:  QT = %.2f VAr ', QT);
+if QT > 0
+    fprintf('(inductive)\n');
+else
+    fprintf('(capacitive)\n');
+end
+fprintf('  Total Apparent Power:  ST = %.2f VA\n', ST);
+fprintf('  Overall Power Factor:  cos(φT) = %.4f ', cos_phiT);
+if QT > 0
+    fprintf('(lagging)\n');
+else
+    fprintf('(leading)\n');
+end
+fprintf('  Phase angle:           φT = %.2f°\n', phiT_deg);
+fprintf('  Line Current:          IT = %.2f A\n\n', IT);
+
+% Vérification pénalité (cos φ < 0.9)
+if cos_phiT < 0.9
+    fprintf('⚠ WARNING: Power factor < 0.9 → 5%% penalty applies!\n\n');
+else
+    fprintf('✓ Power factor ≥ 0.9 → No penalty\n\n');
+end
+
+%% ===== TASK 7: CORRECTION À cos φ = 0.98 =====
+fprintf('========================================\n');
+fprintf('TASK 7: POWER FACTOR CORRECTION TO 0.98\n');
+fprintf('========================================\n');
+
+cos_phi_target = 0.98;          % Objectif
+phi_target = acos(cos_phi_target);
+
+% Nouvelle puissance réactive nécessaire
+Q_target = PT * tan(phi_target); % VAr
+
+% Puissance capacitive à ajouter
+QC = QT - Q_target;              % VAr (positif = condensateurs)
+
+fprintf('Target Power Factor: cos(φ) = %.2f\n', cos_phi_target);
+fprintf('Target Phase Angle: φ = %.2f°\n', phi_target*180/pi);
+fprintf('Target Reactive Power: Q_target = %.2f VAr\n', Q_target);
+fprintf('\nRequired Capacitive Power: QC = %.2f VAr\n', QC);
+fprintf('                          QC = %.2f kVAr\n\n', QC/1000);
+
+%% ===== TASK 8: CALCUL CAPACITANCE =====
+fprintf('========================================\n');
+fprintf('TASK 8: CAPACITOR BANK DESIGN\n');
+fprintf('========================================\n');
+
+% Capacitance: C = QC / (ω * U²)
+C = QC / (omega * U^2);          % Farads
+C_uF = C * 1e6;                  % microFarads
+
+fprintf('Capacitance Calculation:\n');
+fprintf('  Formula: C = QC / (ω × U²)\n');
+fprintf('  C = %.2f / (%.2f × %d²)\n', QC, omega, U);
+fprintf('  C = %.6f F\n', C);
+fprintf('  C = %.2f μF\n\n', C_uF);
+
+%% ===== TASK 9: SYSTÈME APRÈS CORRECTION =====
+fprintf('========================================\n');
+fprintf('TASK 9: SYSTEM AFTER CORRECTION\n');
+fprintf('========================================\n');
+
+% Nouvelles valeurs
+PT_new = PT;                     % Inchangé
+QT_new = Q_target;               % Corrigé
+ST_new = sqrt(PT_new^2 + QT_new^2);
+cos_phiT_new = PT_new / ST_new;
+IT_new = ST_new / U;
+
+fprintf('System Totals (AFTER correction):\n');
+fprintf('  Total Active Power:    PT = %.2f W (unchanged)\n', PT_new);
+fprintf('  Total Reactive Power:  QT = %.2f VAr (corrected)\n', QT_new);
+fprintf('  Total Apparent Power:  ST = %.2f VA\n', ST_new);
+fprintf('  Overall Power Factor:  cos(φT) = %.4f\n', cos_phiT_new);
+fprintf('  Line Current:          IT = %.2f A\n\n', IT_new);
+
+%% ===== TASK 10: RÉDUCTION COURANT =====
+fprintf('========================================\n');
+fprintf('TASK 10: CURRENT REDUCTION\n');
+fprintf('========================================\n');
+
+I_reduction = IT - IT_new;       % A
+I_reduction_percent = (I_reduction / IT) * 100;
+
+fprintf('Current Reduction:\n');
+fprintf('  Before: IT = %.2f A\n', IT);
+fprintf('  After:  IT = %.2f A\n', IT_new);
+fprintf('  Reduction: ΔI = %.2f A\n', I_reduction);
+fprintf('  Percentage: %.2f%%\n\n', I_reduction_percent);
+
+%% ===== TASK 11: ANALYSE ÉCONOMIQUE =====
+fprintf('========================================\n');
+fprintf('TASK 11: ECONOMIC ANALYSIS\n');
+fprintf('========================================\n');
+
+% Coûts
+tarif_kWh = 0.12;                % €/kWh
+penalty_rate = 0.05;             % 5%
+capacitor_cost_per_kVAr = 50;    % €/kVAr
+hours_per_day = 8;               % h
+days_per_month = 30;
+hours_per_month = hours_per_day * days_per_month;
+
+% Consommation mensuelle
+E_monthly = PT * hours_per_month / 1000;  % kWh
+
+% Facture AVANT correction (avec pénalité)
+if cos_phiT < 0.9
+    bill_before_penalty = E_monthly * tarif_kWh;
+    penalty_cost = bill_before_penalty * penalty_rate;
+    bill_before = bill_before_penalty + penalty_cost;
+    fprintf('BEFORE Correction:\n');
+    fprintf('  Monthly Energy: %.2f kWh\n', E_monthly);
+    fprintf('  Base Cost: %.2f €\n', bill_before_penalty);
+    fprintf('  Penalty (5%%): %.2f € (cos φ < 0.9)\n', penalty_cost);
+    fprintf('  Total Bill: %.2f €/month\n\n', bill_before);
+else
+    bill_before = E_monthly * tarif_kWh;
+    fprintf('BEFORE Correction:\n');
+    fprintf('  Monthly Energy: %.2f kWh\n', E_monthly);
+    fprintf('  Total Bill: %.2f €/month (no penalty)\n\n', bill_before);
+end
+
+% Facture APRÈS correction (sans pénalité)
+bill_after = E_monthly * tarif_kWh;
+fprintf('AFTER Correction:\n');
+fprintf('  Monthly Energy: %.2f kWh (unchanged)\n', E_monthly);
+fprintf('  Total Bill: %.2f €/month (no penalty)\n\n', bill_after);
+
+% Économies
+monthly_savings = bill_before - bill_after;
+yearly_savings = monthly_savings * 12;
+
+fprintf('Savings:\n');
+fprintf('  Monthly: %.2f €\n', monthly_savings);
+fprintf('  Yearly: %.2f €\n\n', yearly_savings);
+
+%% ===== TASK 12: RETOUR SUR INVESTISSEMENT =====
+fprintf('========================================\n');
+fprintf('TASK 12: PAYBACK PERIOD\n');
+fprintf('========================================\n');
+
+% Coût du banc de condensateurs
+capacitor_cost = (QC/1000) * capacitor_cost_per_kVAr;  % €
+
+% Période de retour (mois)
+payback_months = capacitor_cost / monthly_savings;
+payback_years = payback_months / 12;
+
+fprintf('Investment Analysis:\n');
+fprintf('  Capacitor Bank Cost: %.2f €\n', capacitor_cost);
+fprintf('  (%.2f kVAr × %.0f €/kVAr)\n', QC/1000, capacitor_cost_per_kVAr);
+fprintf('  Monthly Savings: %.2f €\n', monthly_savings);
+fprintf('  Payback Period: %.1f months (%.2f years)\n\n', payback_months, payback_years);
+
+if payback_years < 2
+    fprintf('✓✓✓ EXCELLENT ROI! Payback < 2 years\n\n');
+elseif payback_years < 5
+    fprintf('✓ GOOD ROI! Payback < 5 years\n\n');
+else
+    fprintf('⚠ Long payback period (> 5 years)\n\n');
+end
+
+%% ===== TASK 13: TRIANGLES DE PUISSANCE =====
+fprintf('========================================\n');
+fprintf('TASK 13: POWER TRIANGLES\n');
+fprintf('========================================\n');
+
+figure('Position', [100 100 1200 500]);
+
+% Triangle AVANT correction
+subplot(1,2,1);
+hold on; axis equal;
+
+% Triangle
+x_before = [0 PT 0 0];
+y_before = [0 0 QT 0];
+fill(x_before, y_before, [1 0.8 0.8], 'EdgeColor', 'r', 'LineWidth', 2);
+
+% Vecteurs
+quiver(0, 0, PT, 0, 0, 'b', 'LineWidth', 3, 'MaxHeadSize', 0.3);
+quiver(0, 0, 0, QT, 0, 'r', 'LineWidth', 3, 'MaxHeadSize', 0.3);
+quiver(0, 0, PT, QT, 0, 'k', 'LineWidth', 3, 'MaxHeadSize', 0.3);
+
+% Labels
+text(PT/2, -500, sprintf('P = %.0f W', PT), 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'b');
+text(-1000, QT/2, sprintf('Q = %.0f VAr', QT), 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'r');
+text(PT/2+1000, QT/2+500, sprintf('S = %.0f VA', ST), 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'k');
+text(PT/2, QT+1500, sprintf('cos φ = %.3f', cos_phiT), 'FontSize', 14, 'FontWeight', 'bold', 'Color', 'red');
+
+grid on;
+xlabel('Active Power P (W)', 'FontSize', 12, 'FontWeight', 'bold');
+ylabel('Reactive Power Q (VAr)', 'FontSize', 12, 'FontWeight', 'bold');
+title('BEFORE Correction', 'FontSize', 14, 'FontWeight', 'bold', 'Color', 'red');
+legend('Power Triangle', 'P (Active)', 'Q (Reactive)', 'S (Apparent)', 'Location', 'best');
+
+% Triangle APRÈS correction
+subplot(1,2,2);
+hold on; axis equal;
+
+% Triangle
+x_after = [0 PT_new 0 0];
+y_after = [0 0 QT_new 0];
+fill(x_after, y_after, [0.8 1 0.8], 'EdgeColor', 'g', 'LineWidth', 2);
+
+% Vecteurs
+quiver(0, 0, PT_new, 0, 0, 'b', 'LineWidth', 3, 'MaxHeadSize', 0.3);
+quiver(0, 0, 0, QT_new, 0, 'g', 'LineWidth', 3, 'MaxHeadSize', 0.3);
+quiver(0, 0, PT_new, QT_new, 0, 'k', 'LineWidth', 3, 'MaxHeadSize', 0.3);
+
+% Labels
+text(PT_new/2, -500, sprintf('P = %.0f W', PT_new), 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'b');
+text(-1000, QT_new/2, sprintf('Q = %.0f VAr', QT_new), 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'g');
+text(PT_new/2+1000, QT_new/2+500, sprintf('S = %.0f VA', ST_new), 'FontSize', 12, 'FontWeight', 'bold', 'Color', 'k');
+text(PT_new/2, QT_new+1500, sprintf('cos φ = %.3f', cos_phiT_new), 'FontSize', 14, 'FontWeight', 'bold', 'Color', 'green');
+
+grid on;
+xlabel('Active Power P (W)', 'FontSize', 12, 'FontWeight', 'bold');
+ylabel('Reactive Power Q (VAr)', 'FontSize', 12, 'FontWeight', 'bold');
+title('AFTER Correction', 'FontSize', 14, 'FontWeight', 'bold', 'Color', 'green');
+legend('Power Triangle', 'P (Active)', 'Q (Reactive)', 'S (Apparent)', 'Location', 'best');
+
+sgtitle('Power Triangles: Before vs After Correction', 'FontSize', 16, 'FontWeight', 'bold');
+
+saveas(gcf, 'Ex3_Power_Triangles.png');
+fprintf('✓ Power triangles saved as: Ex3_Power_Triangles.png\n\n');
+
+%% ===== TASK 14: DIAGRAMME PHASORIEL DES COURANTS =====
+fprintf('========================================\n');
+fprintf('TASK 14: CURRENT PHASOR DIAGRAM\n');
+fprintf('========================================\n');
+
+figure('Position', [150 150 1000 800]);
+hold on; axis equal; grid on;
+
+% Référence: tension U à 0°
+U_phasor = U;
+quiver(0, 0, U_phasor, 0, 0, 'k', 'LineWidth', 4, 'MaxHeadSize', 0.2);
+text(U_phasor*1.05, 10, 'U (ref)', 'FontSize', 14, 'FontWeight', 'bold', 'Color', 'k');
+
+% Courants AVANT correction
+% I1 (moteur, lagging)
+I1_phasor = I1 * exp(-1j*phi1);  % En retard
+quiver(0, 0, real(I1_phasor)*20, imag(I1_phasor)*20, 0, 'r', 'LineWidth', 2.5, 'MaxHeadSize', 0.3);
+text(real(I1_phasor)*22, imag(I1_phasor)*22, 'I1 (motor)', 'FontSize', 11, 'Color', 'r');
+
+% I2 (heating, en phase)
+I2_phasor = I2;
+quiver(0, 0, I2_phasor*20, 0, 0, 'b', 'LineWidth', 2.5, 'MaxHeadSize', 0.3);
+text(I2_phasor*22, -5, 'I2 (heating)', 'FontSize', 11, 'Color', 'b');
+
+% I3 (lighting, lagging)
+I3_phasor = I3 * exp(-1j*phi3);
+quiver(0, 0, real(I3_phasor)*20, imag(I3_phasor)*20, 0, 'm', 'LineWidth', 2.5, 'MaxHeadSize', 0.3);
+text(real(I3_phasor)*22, imag(I3_phasor)*22, 'I3 (lighting)', 'FontSize', 11, 'Color', 'm');
+
+% I4 (electronics, leading)
+I4_phasor = I4 * exp(-1j*phi4);  % phi4 négatif
+quiver(0, 0, real(I4_phasor)*20, imag(I4_phasor)*20, 0, 'c', 'LineWidth', 2.5, 'MaxHeadSize', 0.3);
+text(real(I4_phasor)*22, imag(I4_phasor)*22-10, 'I4 (electronics)', 'FontSize', 11, 'Color', 'c');
+
+% IT total AVANT
+IT_phasor_before = IT * exp(-1j*phiT);
+quiver(0, 0, real(IT_phasor_before)*20, imag(IT_phasor_before)*20, 0, 'r', ...
+    'LineWidth', 4, 'MaxHeadSize', 0.25, 'LineStyle', '--');
+text(real(IT_phasor_before)*22, imag(IT_phasor_before)*22-15, ...
+    sprintf('IT (before) = %.1fA', IT), 'FontSize', 13, 'FontWeight', 'bold', 'Color', 'red');
+
+% IT total APRÈS
+phiT_new = acos(cos_phiT_new);
+IT_phasor_after = IT_new * exp(-1j*phiT_new);
+quiver(0, 0, real(IT_phasor_after)*20, imag(IT_phasor_after)*20, 0, 'g', ...
+    'LineWidth', 4, 'MaxHeadSize', 0.25, 'LineStyle', '--');
+text(real(IT_phasor_after)*22, imag(IT_phasor_after)*22+15, ...
+    sprintf('IT (after) = %.1fA', IT_new), 'FontSize', 13, 'FontWeight', 'bold', 'Color', 'green');
+
+xlabel('Real (scaled)', 'FontSize', 12, 'FontWeight', 'bold');
+ylabel('Imaginary (scaled)', 'FontSize', 12, 'FontWeight', 'bold');
+title('Current Phasor Diagram: Before vs After Correction', 'FontSize', 14, 'FontWeight', 'bold');
+legend('Voltage U (ref)', 'I1 (motor)', 'I2 (heating)', 'I3 (lighting)', 'I4 (electronics)', ...
+    'IT (before)', 'IT (after)', 'Location', 'best', 'FontSize', 10);
+
+saveas(gcf, 'Ex3_Current_Phasor_Diagram.png');
+fprintf('✓ Current phasor diagram saved as: Ex3_Current_Phasor_Diagram.png\n\n');
+
+%% ===== RÉSUMÉ FINAL =====
+fprintf('========================================\n');
+fprintf('EXERCISE 3 SUMMARY\n');
+fprintf('========================================\n');
+fprintf('BEFORE Correction:\n');
+fprintf('  PT = %.0f W\n', PT);
+fprintf('  QT = %.0f VAr\n', QT);
+fprintf('  ST = %.0f VA\n', ST);
+fprintf('  cos(φT) = %.3f %s\n', cos_phiT, '(⚠ penalty)');
+fprintf('  IT = %.2f A\n', IT);
+fprintf('  Monthly bill: %.2f €\n', bill_before);
+fprintf('\nAFTER Correction:\n');
+fprintf('  PT = %.0f W\n', PT_new);
+fprintf('  QT = %.0f VAr\n', QT_new);
+fprintf('  ST = %.0f VA\n', ST_new);
+fprintf('  cos(φT) = %.3f %s\n', cos_phiT_new, '(✓ no penalty)');
+fprintf('  IT = %.2f A\n', IT_new);
+fprintf('  Monthly bill: %.2f €\n', bill_after);
+fprintf('\nCorrection Details:\n');
+fprintf('  Required: QC = %.2f kVAr\n', QC/1000);
+fprintf('  Capacitance: C = %.2f μF\n', C_uF);
+fprintf('  Current reduction: %.2f%% (%.2f A)\n', I_reduction_percent, I_reduction);
+fprintf('  Monthly savings: %.2f €\n', monthly_savings);
+fprintf('  Investment: %.2f €\n', capacitor_cost);
+fprintf('  Payback: %.1f months\n', payback_months);
+fprintf('========================================\n');
+fprintf('\n✓✓✓ EXERCISE 3 COMPLETE!\n');
+fprintf('Files created:\n');
+fprintf('  - Ex3_Power_Triangles.png\n');
+fprintf('  - Ex3_Current_Phasor_Diagram.png\n');
+fprintf('========================================\n');
